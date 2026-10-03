@@ -192,6 +192,8 @@ main { overflow: clip; }
 .has-js .gallery-slide { opacity: 0.6; }
 .has-js .gallery-slide.is-active { opacity: 1; }
 .gallery-slide img { aspect-ratio: 4 / 5; object-fit: cover; border-radius: 7px; user-select: none; -webkit-user-drag: none; }
+.gallery-slide--landscape { flex-basis: min(700px, 84vw); }
+.gallery-slide--landscape img { aspect-ratio: 4 / 3; }
 .gallery-slide figcaption { display: flex; justify-content: space-between; gap: 16px; padding-top: 15px; color: var(--muted); font-size: 11px; }
 .gallery-slide figcaption span:first-child { color: var(--soft); }
 .gallery-track.is-dragging { scroll-snap-type: none; scroll-behavior: auto; user-select: none; cursor: grabbing; }
