@@ -4,3 +4,17 @@
 .download{grid-template-columns:.8fr 1fr 1fr;gap:26px}.download h2{font-size:clamp(48px,4.5vw,68px)}.download-panel{padding:28px;align-self:stretch}.download-panel h3{font-size:23px}.download-panel .button{padding-left:16px;padding-right:16px;font-size:15px}.download-panel dl div{grid-template-columns:72px 1fr;gap:12px}.platform-mark{display:grid;place-items:center;width:64px;height:64px;background:#111815;border-radius:17px;color:#e4eee5;line-height:0;margin:0 0 22px;flex-shrink:0}.platform-mark svg{display:block;width:36px;height:36px;fill:currentColor}.preview-switch button{font-size:14px}@media(max-width:1100px){.download{grid-template-columns:1fr 1fr}.download>div:first-child{grid-column:1/-1}.download h2 br{display:none}.download h2 em{margin-left:.16em}.download>div:first-child>p:last-child{margin-bottom:10px}}@media(max-width:650px){.download{grid-template-columns:1fr;gap:26px}.download>div:first-child{grid-column:auto}.download h2{font-size:55px}.download h2 br{display:block}.download h2 em{margin-left:0}}
 
 .credits-page{max-width:1050px;margin:auto;padding-top:60px}.credits-title{font-size:58px;letter-spacing:-2px}.credits-list{line-height:2}.credits-subheading{font-size:32px;margin-top:48px}
+
+
+/* Co-founder credit: 20% larger than the original 12px footer text. */
+footer .footer-credit{font-size:14.4px;font-weight:700;color:var(--ink)}
+.footer-credit a{color:inherit;text-decoration-thickness:1px;text-underline-offset:4px}
+.footer-credit a:hover,.footer-credit a:focus-visible{color:var(--mint);text-decoration-thickness:2px}
+.about-layout{min-height:100svh;display:flex;flex-direction:column}
+.about-layout>.site-header,.about-layout>footer{width:100%}
+.about-page{flex:1;width:100%;max-width:1050px;margin:auto;padding:80px 5vw 100px}
+.about-page h1{font-size:clamp(46px,7vw,76px);letter-spacing:-2.5px;line-height:1.08;max-width:700px}
+.about-role{font-size:20px;color:var(--mint);margin:0 0 32px}
+.about-note{max-width:520px;color:var(--muted);margin-bottom:36px}
+.about-back{font-size:14px;font-weight:600;text-decoration-thickness:1px}
+@media(max-width:650px){.about-page{padding:55px 6vw 70px}.about-role{font-size:18px}.about-layout>.site-header{gap:16px}.about-layout .about-back{font-size:13px}}
