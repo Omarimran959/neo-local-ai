@@ -6,7 +6,7 @@
   const image = document.getElementById('app-preview');
   const themeButtons = [...preview.querySelectorAll('[data-theme]')];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const interval = 7000;
+  const interval = 2000;
   let current = 0;
   let timer;
   let hovered = false;
