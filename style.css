@@ -38,10 +38,12 @@ footer .footer-credit{font-size:14.4px;font-weight:700;color:var(--ink)}
 .questions summary::after{color:var(--accent-deep)}
 footer .footer-credit a:hover,footer .footer-credit a:focus-visible{color:var(--accent)}
 
-/* A softer coffee introduction, with the established dark footer below. */
-.landing-page{background:#604b3f;color:#fff9f0}
-.landing-page .site-header,.landing-page .hero{--line:#b09a81;--muted:#d9c5af}
-.landing-page .hero-description{color:#e3d6c7}
+/* Burnt-sienna introduction, with the established dark footer below. */
+.landing-page{background:#A94F35;color:#fff9f0}
+.landing-page .site-header,.landing-page .hero{--line:#dbb39c;--muted:#fff0e4}
+.landing-page .hero-description{color:#fff0e4}
+.landing-page .hero .preview-switch button:not(.selected){color:#fff0e4}
+.landing-page .site-header nav a:hover{color:#fff9f0}
 .landing-page .hero .primary{background:#f0dec3;color:#38291f}
 .landing-page .hero .primary:hover{background:#faebd7}
 .landing-page>footer{background:var(--onyx);max-width:none;padding-inline:max(5vw,calc((100vw - 1278px)/2))}
