@@ -1,0 +1,74 @@
+.guide-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  align-items: center;
+  gap: 40px;
+}
+
+.guide-hero-copy {
+  min-width: 0;
+}
+
+.neo-robot {
+  position: relative;
+  width: min(100%, 500px);
+  aspect-ratio: 1;
+  justify-self: center;
+  isolation: isolate;
+}
+
+.neo-robot-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.neo-eye-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* A 180ms blink every five seconds. Each eye has its own aligned layer. */
+.neo-eye-cover {
+  opacity: 0;
+  animation: neo-eye-cover 5s linear infinite;
+}
+
+.neo-eye-shape {
+  transform-box: view-box;
+  animation: neo-eye-blink 5s ease-in-out infinite;
+}
+
+.neo-eye-shape-left { transform-origin: 652px 610px; }
+.neo-eye-shape-right { transform-origin: 873px 615px; }
+.neo-eye-cover-right, .neo-eye-shape-right { animation-delay: 25ms; }
+
+@keyframes neo-eye-cover {
+  0%, 95.999%, 99.601%, 100% { opacity: 0; }
+  96%, 99.6% { opacity: 1; }
+}
+
+@keyframes neo-eye-blink {
+  0%, 96%, 99.6%, 100% { transform: scaleY(1); }
+  97.4%, 98.2% { transform: scaleY(.065); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-eye-cover, .neo-eye-shape { animation: none; }
+  .neo-eye-overlay { display: none; }
+}
+
+@media (max-width: 760px) {
+  .guide-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .neo-robot {
+    width: min(100%, 440px);
+  }
+}

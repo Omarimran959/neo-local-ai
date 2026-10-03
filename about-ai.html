@@ -12,6 +12,7 @@
   <link rel="icon" href="assets/logo.svg">
   <link rel="stylesheet" href="style.css?v=brown-cream-1">
   <link rel="stylesheet" href="ai-guide.css?v=1">
+  <link rel="stylesheet" href="about-robot.css?v=1">
 </head>
 <body class="ai-guide-page">
 <header class="site-header">
@@ -20,10 +21,53 @@
 </header>
 <main>
   <section class="guide-hero section" aria-labelledby="guide-title">
-    <p class="eyebrow">About Local AI</p>
-    <h1 id="guide-title">Get to know<br><em>your AI.</em></h1>
-    <p class="guide-lead">Neo brings a few useful AI models into one simple app on your computer. Here’s what’s inside, how it works, and what you can do with it.</p>
-    <nav class="guide-jumps" aria-label="On this page"><a href="#models">The models <span aria-hidden="true">↓</span></a><a href="#built">How Neo was built <span aria-hidden="true">↓</span></a><a href="#features">The features <span aria-hidden="true">↓</span></a></nav>
+    <div class="guide-hero-copy">
+      <p class="eyebrow">About Local AI</p>
+      <h1 id="guide-title">Get to know<br><em>your AI.</em></h1>
+      <p class="guide-lead">Neo brings a few useful AI models into one simple app on your computer. Here’s what’s inside, how it works, and what you can do with it.</p>
+      <nav class="guide-jumps" aria-label="On this page"><a href="#models">The models <span aria-hidden="true">↓</span></a><a href="#built">How Neo was built <span aria-hidden="true">↓</span></a><a href="#features">The features <span aria-hidden="true">↓</span></a></nav>
+    </div>
+    <div class="neo-robot">
+      <img class="neo-robot-image" src="assets/neo-robot.png" width="1254" height="1254" alt="Neo Local AI’s friendly cream robot with a copper orbital ring and warm amber eyes.">
+      <!-- The original PNG stays untouched. Only these two face-local layers blink. -->
+      <svg class="neo-eye-overlay" viewBox="0 0 1254 1254" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="neo-face-left" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#211c17"/><stop offset="1" stop-color="#17120e"/>
+          </linearGradient>
+          <linearGradient id="neo-face-right" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#29231d"/><stop offset="1" stop-color="#201710"/>
+          </linearGradient>
+          <radialGradient id="neo-lid-feather">
+            <stop offset="0" stop-color="white"/><stop offset=".78" stop-color="white"/><stop offset="1" stop-color="black"/>
+          </radialGradient>
+          <mask id="neo-left-soft" maskUnits="userSpaceOnUse" x="550" y="526" width="207" height="155">
+            <ellipse cx="652" cy="603" rx="102" ry="77" fill="url(#neo-lid-feather)"/>
+          </mask>
+          <mask id="neo-right-soft" maskUnits="userSpaceOnUse" x="788" y="544" width="160" height="121">
+            <ellipse cx="870" cy="606" rx="82" ry="61" fill="url(#neo-lid-feather)"/>
+          </mask>
+          <clipPath id="neo-left-eye-crop"><ellipse cx="652" cy="601" rx="87" ry="53"/></clipPath>
+          <clipPath id="neo-right-eye-crop"><ellipse cx="873" cy="606" rx="65" ry="42"/></clipPath>
+          <!-- This diagonal boundary stays above the foreground copper ring. -->
+          <clipPath id="neo-right-face-boundary"><path d="M788 540H945V625L916 650H788Z"/></clipPath>
+        </defs>
+        <g class="neo-eye-cover neo-eye-cover-left">
+          <rect x="550" y="526" width="207" height="155" fill="url(#neo-face-left)" mask="url(#neo-left-soft)"/>
+          <g class="neo-eye-shape neo-eye-shape-left">
+            <image href="assets/neo-robot.png" width="1254" height="1254" clip-path="url(#neo-left-eye-crop)"/>
+          </g>
+        </g>
+        <g clip-path="url(#neo-right-face-boundary)">
+          <g class="neo-eye-cover neo-eye-cover-right">
+            <rect x="788" y="544" width="160" height="121" fill="url(#neo-face-right)" mask="url(#neo-right-soft)"/>
+            <g class="neo-eye-shape neo-eye-shape-right">
+              <image href="assets/neo-robot.png" width="1254" height="1254" clip-path="url(#neo-right-eye-crop)"/>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
   </section>
   <section class="guide-section section" id="models" aria-labelledby="models-title">
     <div class="guide-section-head"><p class="eyebrow">01 / The models</p><h2 id="models-title">Three assistants.<br>Different strengths.</h2><p>Neo is the app that brings them together. Each assistant uses an existing model developed by its credited publisher.</p></div>
