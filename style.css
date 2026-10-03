@@ -6,7 +6,7 @@
 .credits-page{max-width:1050px;margin:auto;padding-top:60px}.credits-title{font-size:58px;letter-spacing:-2px}.credits-list{line-height:2}.credits-subheading{font-size:32px;margin-top:48px}
 
 
-/* Co-founder credit: 20% larger than the original 12px footer text. */
+/* Founder credit: 20% larger than the original 12px footer text. */
 footer .footer-credit{font-size:14.4px;font-weight:700;color:var(--ink)}
 .footer-credit a{color:inherit;text-decoration-thickness:1px;text-underline-offset:4px}
 .footer-credit a:hover,.footer-credit a:focus-visible{color:var(--mint);text-decoration-thickness:2px}
@@ -18,3 +18,10 @@ footer .footer-credit{font-size:14.4px;font-weight:700;color:var(--ink)}
 .about-note{max-width:520px;color:var(--muted);margin-bottom:36px}
 .about-back{font-size:14px;font-weight:600;text-decoration-thickness:1px}
 @media(max-width:650px){.about-page{padding:55px 6vw 70px}.about-role{font-size:18px}.about-layout>.site-header{gap:16px}.about-layout .about-back{font-size:13px}}
+
+/* Charcoal download section */
+.download{background:#0c0f12;color:#edf0f2}
+.download .download-panel{background:#15191e;border-color:#353d45}
+.download .eyebrow,.download>div>p:last-child,.download .release-label,.download .download-detail,.download dt,.download .platform-note{color:#b7bfc8}
+.download .download-panel dl div{border-top-color:#343c44}
+.download .platform-mark{background:#0c1014}
