@@ -1,0 +1,278 @@
+name: Windows installer smoke check
+
+on:
+  workflow_dispatch:
+    inputs:
+      installer_url:
+        description: Exact published installer URL
+        required: true
+        default: https://neolocalai.isroot.in/downloads/Neo-Local-AI-1.3.1-Windows-x64-Setup.exe
+        type: string
+      installer_sha256:
+        description: Expected SHA-256 from the reviewed installer build
+        required: true
+        default: 5520203ceea5c7679dbb96c1f0c6d4068c4b8567011e55cca9ccb5dd6fe93fea
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install, launch, upgrade and uninstall exact published EXE
+        shell: pwsh
+        env:
+          NEO_INSTALLER_URL: ${{ inputs.installer_url }}
+          NEO_INSTALLER_SHA256: ${{ inputs.installer_sha256 }}
+        run: |
+          & {
+          #requires -Version 7.2
+          <#
+          Run only on a fresh, disposable Windows runner. Tests the exact published setup
+          artifact without downloading models or opening a browser. No personal files are
+          read, and existing Neo installs/data cause an immediate refusal before changes.
+          #>
+          [CmdletBinding(DefaultParameterSetName = 'Download')]
+          param(
+              [Parameter(Mandatory, ParameterSetName = 'Download')]
+              [ValidatePattern('^https://')][string]$InstallerUrl,
+              [Parameter(Mandatory, ParameterSetName = 'Local')][string]$InstallerPath,
+              [Parameter(Mandatory)][ValidatePattern('^[a-fA-F0-9]{64}$')][string]$ExpectedSha256,
+              [ValidatePattern('^\d+\.\d+\.\d+$')][string]$SetupVersion = '1.3.1',
+              [ValidatePattern('^\d+\.\d+\.\d+$')][string]$ApplicationVersion = '1.3.0',
+              [string]$ReportDirectory = (Join-Path ([IO.Path]::GetTempPath()) 'neo-installer-smoke'),
+              [switch]$AllowDisposableLocalMachine
+          )
+          Set-StrictMode -Version Latest
+          $ErrorActionPreference = 'Stop'
+          if (-not $IsWindows) { throw 'This smoke check requires Windows.' }
+          if (-not [Environment]::Is64BitProcess -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
+              throw 'Run with 64-bit PowerShell on a native AMD64 Windows PC.'
+          }
+          if ($env:GITHUB_ACTIONS -ne 'true' -and -not $AllowDisposableLocalMachine) {
+              throw 'Use a disposable CI runner, or explicitly opt in on an empty disposable Windows test machine.'
+          }
+          $InstallRoot = Join-Path $env:LOCALAPPDATA 'Programs\Neo Local AI'
+          $SupportRoot = Join-Path $env:LOCALAPPDATA 'Neo Local AI'
+          $DesktopLink = Join-Path ([Environment]::GetFolderPath('DesktopDirectory')) 'Neo Local AI.lnk'
+          $MenuRoot = Join-Path ([Environment]::GetFolderPath('StartMenu')) 'Programs\Neo Local AI'
+          $MenuLink = Join-Path $MenuRoot 'Neo Local AI.lnk'
+          $RegistryPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Neo Local AI'
+          foreach ($existing in @($InstallRoot, $SupportRoot, $DesktopLink, $MenuRoot, $RegistryPath, 'HKCU:\Software\Neo Local AI')) {
+              if (Test-Path -LiteralPath $existing) { throw "Refusing to touch existing Neo files/settings: $existing" }
+          }
+          $portProbe = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, 8785)
+          try { $portProbe.Start() } finally { $portProbe.Stop() }
+          New-Item -ItemType Directory -Path $ReportDirectory -Force | Out-Null
+          $ReportDirectory = (Resolve-Path -LiteralPath $ReportDirectory).Path
+          $checks = [Collections.Generic.List[object]]::new()
+          $report = [ordered]@{
+              product = 'Neo Local AI'; setup_version = $SetupVersion; application_version = $ApplicationVersion
+              started_at = [DateTime]::UtcNow.ToString('o'); completed_at = $null
+              passed = $false; installer_url = $InstallerUrl; expected_sha256 = $ExpectedSha256.ToLowerInvariant()
+              actual_sha256 = $null; windows = [Environment]::OSVersion.VersionString
+              checks = $checks; error = $null
+              scope = 'Exact EXE install, file integrity, versions, shortcuts, local startup, silent upgrade and data-preserving uninstall. No model downloads or AI inference.'
+          }
+          $httpHandler = [Net.Http.HttpClientHandler]::new()
+          $httpHandler.UseProxy = $false
+          $httpHandler.AllowAutoRedirect = $false
+          $script:http = [Net.Http.HttpClient]::new($httpHandler)
+          $script:http.Timeout = [TimeSpan]::FromSeconds(2)
+          $installedByTest = $false
+          $failure = $null
+          function Assert-Check([bool]$Condition, [string]$Name, [string]$Detail = '') {
+              if (-not $Condition) { throw "FAILED: $Name. $Detail" }
+              $checks.Add([ordered]@{ name = $Name; passed = $true; detail = $Detail })
+              Write-Host "PASS: $Name"
+          }
+          function Invoke-Program([string]$File, [string[]]$Arguments, [string]$Label, [int]$TimeoutSeconds = 90) {
+              $info = [Diagnostics.ProcessStartInfo]::new()
+              $info.FileName = $File
+              $info.WorkingDirectory = Split-Path -Parent $File
+              $info.UseShellExecute = $false
+              $info.CreateNoWindow = $true
+              $info.RedirectStandardOutput = $true
+              $info.RedirectStandardError = $true
+              foreach ($argument in $Arguments) { $info.ArgumentList.Add($argument) }
+              $process = [Diagnostics.Process]::new()
+              $process.StartInfo = $info
+              if (-not $process.Start()) { throw "Could not start $Label" }
+              $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+              $stderrTask = $process.StandardError.ReadToEndAsync()
+              if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+                  # Only this process, started by the smoke check, is terminated on timeout.
+                  try { $process.Kill($true) } catch {}
+                  throw "$Label timed out after $TimeoutSeconds seconds."
+              }
+              $stdout = $stdoutTask.GetAwaiter().GetResult()
+              $stderr = $stderrTask.GetAwaiter().GetResult()
+              $exitCode = $process.ExitCode
+              $process.Dispose()
+              [IO.File]::WriteAllText((Join-Path $ReportDirectory "$Label.stdout.txt"), $stdout)
+              [IO.File]::WriteAllText((Join-Path $ReportDirectory "$Label.stderr.txt"), $stderr)
+              Assert-Check ($exitCode -eq 0) "$Label exit code" "exit=$exitCode; see captured stdout/stderr"
+              return $stdout
+          }
+          function Get-NeoStatus {
+              try {
+                  $json = $script:http.GetStringAsync('http://127.0.0.1:8785/api/status').GetAwaiter().GetResult()
+                  return ($json | ConvertFrom-Json)
+              } catch { return $null }
+          }
+          function Assert-Shortcut([string]$Path, [string]$Label) {
+              Assert-Check (Test-Path -LiteralPath $Path) "$Label exists"
+              $shell = New-Object -ComObject WScript.Shell
+              try {
+                  $link = $shell.CreateShortcut($Path)
+                  Assert-Check ($link.TargetPath -ieq (Join-Path $InstallRoot 'resources\python\pythonw.exe')) "$Label uses bundled pythonw"
+                  Assert-Check ($link.Arguments -ceq ('-I -B "' + (Join-Path $InstallRoot 'resources\launcher.pyw') + '"')) "$Label has isolated launcher arguments"
+                  Assert-Check ($link.WorkingDirectory -ieq $InstallRoot) "$Label working directory"
+              } finally { [Runtime.InteropServices.Marshal]::ReleaseComObject($shell) | Out-Null }
+          }
+          try {
+              if ($PSCmdlet.ParameterSetName -eq 'Download') {
+                  $InstallerPath = Join-Path $ReportDirectory "Neo-Local-AI-$SetupVersion-Windows-x64-Setup.exe"
+                  Invoke-WebRequest -Uri $InstallerUrl -OutFile $InstallerPath -TimeoutSec 180
+              }
+              $InstallerPath = (Resolve-Path -LiteralPath $InstallerPath).Path
+              $report.actual_sha256 = (Get-FileHash -LiteralPath $InstallerPath -Algorithm SHA256).Hash.ToLowerInvariant()
+              Assert-Check ($report.actual_sha256 -ceq $report.expected_sha256) 'Published installer SHA-256 matches expected artifact'
+              $versionInfo = [Diagnostics.FileVersionInfo]::GetVersionInfo($InstallerPath)
+              $versionPattern = '^' + [regex]::Escape($SetupVersion) + '(?:\.0)?$'
+              Assert-Check ($versionInfo.ProductVersion -match $versionPattern) 'Setup product version' $versionInfo.ProductVersion
+              Assert-Check ($versionInfo.FileVersion -match $versionPattern) 'Setup file version' $versionInfo.FileVersion
+              Assert-Check ($versionInfo.ProductName -ceq 'Neo Local AI') 'Setup product name'
+              Invoke-Program $InstallerPath @('/S') 'silent-install' 180 | Out-Null
+              $installedByTest = $true
+              Assert-Check (Test-Path -LiteralPath $InstallRoot) 'Installs to current user Programs folder'
+              Assert-Check (-not (Test-Path -LiteralPath $SupportRoot)) 'Installer creates no user-data or model downloads'
+              $manifestPath = Join-Path $InstallRoot 'installer-manifest.json'
+              $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+              Assert-Check ($manifest.setup_version -eq $SetupVersion -and $manifest.application_version -eq $ApplicationVersion) 'Payload version manifest'
+              Assert-Check ($manifest.architecture -ceq 'AMD64') 'Payload declares AMD64'
+              $payloadCount = 0
+              foreach ($item in $manifest.files.PSObject.Properties) {
+                  $path = [IO.Path]::GetFullPath((Join-Path $InstallRoot $item.Name))
+                  if (-not $path.StartsWith($InstallRoot + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Manifest path escapes installation.' }
+                  if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing installed file: $($item.Name)" }
+                  if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ine $item.Value) { throw "Installed checksum mismatch: $($item.Name)" }
+                  $payloadCount++
+              }
+              Assert-Check ($payloadCount -gt 40) 'Installed payload checksums match manifest' "$payloadCount files"
+              Assert-Check (@(Get-ChildItem -LiteralPath $InstallRoot -Recurse -Filter '*.gguf').Count -eq 0) 'Setup bundles no model weights'
+              Assert-Shortcut $DesktopLink 'Desktop shortcut'
+              Assert-Shortcut $MenuLink 'Start menu shortcut'
+              $registration = Get-ItemProperty -LiteralPath $RegistryPath
+              Assert-Check ($registration.DisplayVersion -eq $SetupVersion -and $registration.InstallLocation -ieq $InstallRoot) 'Per-user uninstall registration'
+              $uninstaller = Join-Path $InstallRoot 'Uninstall Neo Local AI.exe'
+              Assert-Check ($registration.QuietUninstallString -ceq ('"' + $uninstaller + '" /S')) 'Registered silent uninstaller'
+              $python = Join-Path $InstallRoot 'resources\python\python.exe'
+              $launcher = Join-Path $InstallRoot 'resources\launcher.pyw'
+              $probeScript = Join-Path $ReportDirectory 'launcher-probe.py'
+              @'
+          import ctypes, json, runpy, struct, sys, types, urllib.request
+          assert sys.flags.isolated and sys.flags.dont_write_bytecode
+          assert struct.calcsize('P') == 8
+          module = runpy.run_path(sys.argv[1], run_name='neo_smoke_launcher')
+          g = module['main'].__globals__
+          def blocked_dialog(*args):
+              raise RuntimeError('Launcher attempted a setup/error dialog: ' + str(args[1] if len(args) > 1 else args))
+          # Keep the real Windows loader preflight; turn any user prompt into a test failure.
+          g['ctypes'] = types.SimpleNamespace(windll=types.SimpleNamespace(
+              kernel32=ctypes.windll.kernel32,
+              user32=types.SimpleNamespace(MessageBoxW=blocked_dialog)))
+          g['open_window'] = lambda: print('Browser/app window launch suppressed by smoke check')
+          assert g['main']() == 0, 'Launcher returned failure'
+          assert g['ready'](), 'Launcher readiness check failed'
+          http = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+          with http.open('http://127.0.0.1:8785/api/status', timeout=5) as response:
+              status = json.load(response)
+          assert status['app'] == 'Neo Local AI'
+          assert status['distribution'] == 'portable' and status['platform'] == 'windows'
+          assert status['version'] == sys.argv[2]
+          assert status['state'] == 'setup' and status['setup_state'] == 'ready'
+          assert status['downloaded'] == 0 and not status['complete']
+          with http.open('http://127.0.0.1:8785/', timeout=5) as response:
+              html = response.read(200000).decode('utf-8')
+          assert 'Neo' in html and ('Download' in html or 'download' in html)
+          print(json.dumps({'python': sys.version, 'pointer_bits': 64, 'local_status': status}, indent=2))
+          '@ | Set-Content -LiteralPath $probeScript -Encoding utf8
+              Invoke-Program $python @('-I', '-B', $probeScript, $launcher, $ApplicationVersion) 'launcher-startup' 90 | Out-Null
+              Assert-Check ($null -ne (Get-NeoStatus)) 'Bundled launcher and bootstrap serve local first-run setup'
+              Assert-Check (@(Get-ChildItem -LiteralPath (Join-Path $SupportRoot 'models') -File).Count -eq 0) 'First launch waits for user before model download'
+              $sentinelId = [Guid]::NewGuid().ToString('N')
+              $sentinels = @{
+                  (Join-Path $SupportRoot 'models\smoke-preserve.gguf.part') = "model-part-$sentinelId"
+                  (Join-Path $SupportRoot 'data\smoke-private-note.txt') = "private-note-$sentinelId"
+                  (Join-Path $SupportRoot 'settings.json') = ('{"smoke_preserve":"' + $sentinelId + '"}')
+                  (Join-Path $InstallRoot 'smoke-user-added.txt') = "unshipped-file-$sentinelId"
+              }
+              foreach ($entry in $sentinels.GetEnumerator()) { [IO.File]::WriteAllText($entry.Key, $entry.Value) }
+              # A same-version upgrade must stop the running service, keep user data and
+              # preserve unknown files even inside the install folder.
+              Invoke-Program $InstallerPath @('/S') 'silent-upgrade' 180 | Out-Null
+              Assert-Check ($null -eq (Get-NeoStatus)) 'Upgrade stops the identified Neo service'
+              foreach ($entry in $sentinels.GetEnumerator()) {
+                  Assert-Check ((Test-Path -LiteralPath $entry.Key) -and [IO.File]::ReadAllText($entry.Key) -ceq $entry.Value) 'Upgrade preserves test sentinel' (Split-Path -Leaf $entry.Key)
+              }
+              Invoke-Program $python @('-I', '-B', $probeScript, $launcher, $ApplicationVersion) 'launcher-restart' 90 | Out-Null
+              Assert-Check ($null -ne (Get-NeoStatus)) 'Launcher restarts successfully after upgrade'
+              Invoke-Program $uninstaller @('/S') 'silent-uninstall' 90 | Out-Null
+              # NSIS starts a temporary copy of its uninstaller. The initial EXE can exit
+              # before that copy completes, so observe removal rather than trusting its PID.
+              $deadline = [DateTime]::UtcNow.AddSeconds(45)
+              while (((Test-Path -LiteralPath $python) -or (Test-Path -LiteralPath $DesktopLink) -or (Test-Path -LiteralPath $RegistryPath)) -and [DateTime]::UtcNow -lt $deadline) {
+                  Start-Sleep -Milliseconds 250
+              }
+              Assert-Check ($null -eq (Get-NeoStatus)) 'Uninstaller stops Neo local service'
+              foreach ($item in $manifest.files.PSObject.Properties) {
+                  if (Test-Path -LiteralPath (Join-Path $InstallRoot $item.Name)) { throw "Uninstaller left shipped file: $($item.Name)" }
+              }
+              Assert-Check (-not (Test-Path -LiteralPath $manifestPath) -and -not (Test-Path -LiteralPath $uninstaller)) 'Uninstaller removes shipped files and itself'
+              Assert-Check (-not (Test-Path -LiteralPath $DesktopLink) -and -not (Test-Path -LiteralPath $MenuRoot)) 'Uninstaller removes Neo shortcuts'
+              Assert-Check (-not (Test-Path -LiteralPath $RegistryPath) -and -not (Test-Path -LiteralPath 'HKCU:\Software\Neo Local AI')) 'Uninstaller removes only Neo registration'
+              foreach ($entry in $sentinels.GetEnumerator()) {
+                  Assert-Check ((Test-Path -LiteralPath $entry.Key) -and [IO.File]::ReadAllText($entry.Key) -ceq $entry.Value) 'Uninstall preserves test sentinel' (Split-Path -Leaf $entry.Key)
+              }
+              $report.passed = $true
+          } catch {
+              $failure = $_
+              $report.error = $_.ToString()
+              Write-Warning $report.error
+          } finally {
+              # On failure, gracefully stop only the identified Neo service from this run.
+              # Leave files/logs for inspection; never erase a user-data directory here.
+              if ($installedByTest -and (Test-Path -LiteralPath (Join-Path $InstallRoot 'resources\python\python.exe'))) {
+                  try {
+                      Invoke-Program (Join-Path $InstallRoot 'resources\python\python.exe') @('-I', '-B', (Join-Path $InstallRoot 'resources\installer_actions.py'), '--stop') 'cleanup-service' 35 | Out-Null
+                  } catch { Write-Warning "Cleanup failed: $_" }
+              }
+              $script:http.Dispose()
+              $httpHandler.Dispose()
+              $report.completed_at = [DateTime]::UtcNow.ToString('o')
+              $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $ReportDirectory 'report.json') -Encoding utf8
+              foreach ($name in @('app.log', 'launcher.log')) {
+                  $source = Join-Path $SupportRoot "data\$name"
+                  if (Test-Path -LiteralPath $source) { Copy-Item -LiteralPath $source -Destination (Join-Path $ReportDirectory $name) }
+              }
+          }
+          if ($null -ne $failure) { throw $failure }
+          Write-Host "All installer smoke checks passed. Report: $(Join-Path $ReportDirectory 'report.json')"
+          } -InstallerUrl $env:NEO_INSTALLER_URL -ExpectedSha256 $env:NEO_INSTALLER_SHA256 -ReportDirectory "$env:RUNNER_TEMP/neo-installer-smoke"
+      - name: Upload validation report and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neo-windows-installer-check-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/neo-installer-smoke/report.json
+            ${{ runner.temp }}/neo-installer-smoke/*.stdout.txt
+            ${{ runner.temp }}/neo-installer-smoke/*.stderr.txt
+            ${{ runner.temp }}/neo-installer-smoke/app.log
+            ${{ runner.temp }}/neo-installer-smoke/launcher.log
+          if-no-files-found: warn
+          retention-days: 14
