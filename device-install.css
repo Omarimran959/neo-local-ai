@@ -6,7 +6,7 @@
 .preview-panel{grid-area:1/1;min-width:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .4s ease,visibility .4s}
 .preview-panel.is-active{opacity:1;visibility:visible;pointer-events:auto}
 .preview-panel[hidden]{display:none!important}
-.neo-preview .app-window{transform:rotate(-11.3deg);transform-origin:center;max-width:min(520px,90%);margin:auto}
+.neo-preview .app-window{transform:rotate(-4deg);transform-origin:center;max-width:min(520px,90%);margin:auto}
 .neo-preview .preview-top{max-width:520px;margin:0 auto 14px}
 .device-visual{display:block;width:100%;height:auto;filter:drop-shadow(0 24px 28px #1e171b35)}
 .windows-options{display:flex;flex-direction:column;gap:10px;margin-top:18px}
