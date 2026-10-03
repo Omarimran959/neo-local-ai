@@ -1,0 +1,27 @@
+/* A device illustration alongside the established coffee introduction. */
+.hero{grid-template-columns:.82fr 1.18fr;gap:4vw}
+.device-stage{min-width:0;margin:0;align-self:center}
+.neo-preview{min-width:0}
+.device-preview-views{display:grid;min-height:540px;align-items:center}
+.preview-panel{grid-area:1/1;min-width:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .65s ease,visibility .65s}
+.preview-panel.is-active{opacity:1;visibility:visible;pointer-events:auto}
+.preview-panel[hidden]{display:none!important}
+.neo-preview .app-window{transform:none;max-width:520px;margin:auto}
+.neo-preview .preview-top{max-width:520px;margin:0 auto 14px}
+.device-visual{display:block;width:100%;height:auto;filter:drop-shadow(0 24px 28px #1e171b35)}
+.windows-options{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.windows-options .button{min-height:46px;padding:12px 16px}
+.windows-options .not-supported{width:100%;min-height:46px;border:1px solid #c8b7a1;border-radius:26px;background:#eee5d8;color:#655b50;padding:12px 16px;font:inherit;font-size:14px;font-weight:550;cursor:not-allowed}
+.architecture-help{color:#62574d;font-size:12px;margin:11px 0 18px}
+.architecture-help strong{font-weight:600}
+.setup-help{padding-top:17px;border-top:1px solid #ded0bd;margin-top:18px}
+.setup-help summary{cursor:pointer;font-size:13px;font-weight:600;line-height:1.6}
+.setup-help p{font-size:12px;color:#62574d;line-height:1.65}
+.setup-help ol{padding-left:20px;font-size:13px;color:#62574d;line-height:1.8}
+.windows-portable{display:inline-block;margin-top:12px;font-size:12px;color:#78583d}
+@media(min-width:1450px){.hero{gap:45px}}
+@media(max-width:1000px){.hero{grid-template-columns:.88fr 1.12fr;gap:2vw}}
+@media(max-width:1000px){.device-preview-views{min-height:390px}}
+@media(max-width:650px){.hero{grid-template-columns:1fr;gap:34px}.device-stage{margin:0 -3vw}.device-preview-views{min-height:375px}.windows-options{gap:10px}}
+
+@media(prefers-reduced-motion:reduce){.preview-panel{transition:none}}
