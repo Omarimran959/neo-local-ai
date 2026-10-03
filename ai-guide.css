@@ -1,0 +1,46 @@
+.site-header .nav-about-ai[aria-current="page"]{text-decoration:underline;text-underline-offset:6px}
+.ai-guide-page{background:#604b3f;color:#fff9f0}
+.guide-hero{padding-top:62px;padding-bottom:64px}
+.guide-hero h1{font-size:clamp(56px,7vw,88px);letter-spacing:-4px;line-height:1.03}
+.guide-lead{max-width:690px;font-size:20px;line-height:1.7;color:#e3d6c7;margin:0}
+.guide-jumps{margin-top:34px;gap:12px;flex-wrap:wrap}
+.guide-jumps a{border:1px solid #b09a8180;border-radius:24px;padding:11px 17px;font-size:14px}
+.guide-jumps span{padding-left:12px}
+.guide-section{background:#faf9f6;color:#292823;color-scheme:light;padding-top:76px;padding-bottom:76px;scroll-margin-top:16px}
+.guide-warm{background:#f0eee8}
+.guide-section-head{max-width:700px;margin-bottom:38px}
+.guide-section-head .eyebrow{color:#78583d}
+.guide-section-head>p:last-child{color:#625b52;font-size:17px;max-width:630px}
+.guide-section h2{font-size:clamp(36px,4vw,54px);letter-spacing:-2px}
+.guide-models{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.guide-models article{padding:28px;border:1px solid #ddd4c7;border-radius:16px;background:#fffdf9;display:flex;flex-direction:column}
+.guide-label{display:block;color:#78583d;font-size:11px;letter-spacing:1.5px;font-weight:650;margin-bottom:19px}
+.guide-models h3{font-size:23px;line-height:1.25;letter-spacing:-.7px}
+.guide-models p{color:#625b52;margin:4px 0 12px;font-size:15px}
+.guide-models dl{margin:0 0 20px;font-size:13px;flex:1}
+.guide-models dl div{display:block;padding:13px 0}
+.guide-models dt{margin-bottom:5px;color:#78583d}
+.guide-models dd{line-height:1.6}
+.guide-models a,.guide-credits{font-size:14px;font-weight:600;color:#78583d}
+.guide-footnote{color:#625b52;font-size:13px;max-width:840px;margin:24px 0 0}
+.guide-build{padding:0;margin:0;list-style:none;display:grid;gap:0}
+.guide-build li{display:grid;grid-template-columns:80px minmax(0,1fr);gap:22px;padding:27px 0;border-top:1px solid #d6ccbc}
+.guide-build li>span{font-size:13px;color:#78583d;padding-top:6px}
+.guide-build h3{font-size:23px;letter-spacing:-.6px}
+.guide-build p{max-width:800px;margin:0;color:#625b52}
+.guide-features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px}
+.guide-features article{border-top:1px solid #d6ccbc;padding-top:24px}
+.guide-features h3{font-size:21px;letter-spacing:-.5px}
+.guide-features p{color:#625b52;font-size:15px;margin:0}
+.guide-version{padding:26px 30px;background:#eee7df;border:1px solid #ded0bd;border-radius:14px;margin:40px 0 32px}
+.guide-version .guide-label{margin-bottom:12px}
+.guide-version h3{font-size:24px}
+.guide-version p{font-size:15px;color:#625b52;max-width:850px;margin:0}
+.guide-note{border-top:1px solid #d6ccbc;margin:42px 0 22px;padding-top:26px}
+.guide-note strong{font-weight:600}
+.guide-note p{max-width:900px;font-size:14px;color:#625b52;margin:9px 0 0}
+.guide-section a:focus-visible{outline-color:#78583d}
+.ai-guide-page>footer{background:var(--onyx);max-width:none;padding-inline:max(5vw,calc((100vw - 1278px)/2))}
+@media(max-width:1000px){.guide-models{gap:14px}.guide-models article{padding:21px}.guide-models h3{font-size:21px}.guide-features{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.guide-models{grid-template-columns:1fr}.guide-section{padding-top:55px;padding-bottom:55px}.guide-features{grid-template-columns:1fr;gap:24px}.guide-build li{grid-template-columns:28px minmax(0,1fr);gap:15px}.guide-version{padding:23px}.guide-hero{padding-top:38px}.guide-hero h1{letter-spacing:-3px}.guide-lead{font-size:17px}.guide-jumps{gap:10px}.guide-jumps a{font-size:13px;padding:10px 13px;display:block}.ai-guide-page>footer{padding-inline:6vw}}
+@media(max-width:650px){.landing-page>.site-header,.ai-guide-page>.site-header{flex-wrap:wrap;gap:18px}.landing-page>.site-header>nav,.ai-guide-page>.site-header>nav{width:100%;justify-content:space-between;gap:12px}.site-header nav .nav-about-ai{display:block;font-size:14px}.guide-jumps{display:flex;justify-content:flex-start;gap:9px}.guide-jumps a:not(.nav-download){display:block}}

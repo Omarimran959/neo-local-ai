@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self'; style-src 'self'; script-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#604b3f">
+  <title>About Local AI — Neo Local AI</title>
+  <meta name="description" content="Meet Neo Local AI: its three local assistants, the models behind them, how the app was built, and what its features do.">
+  <link rel="canonical" href="https://neolocalai.isroot.in/about-ai.html">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="style.css?v=brown-cream-1">
+  <link rel="stylesheet" href="ai-guide.css?v=1">
+</head>
+<body class="ai-guide-page">
+<header class="site-header">
+  <a class="brand" href="./"><img src="assets/logo.svg" width="40" height="40" alt=""><span>Neo Local AI</span></a>
+  <nav aria-label="Main navigation"><a href="./#inside">What’s inside</a><a class="nav-about-ai" href="about-ai.html" aria-current="page">About Local AI</a><a href="./#setup">How to install</a><a class="nav-download" href="./#download">Get Neo</a></nav>
+</header>
+<main>
+  <section class="guide-hero section" aria-labelledby="guide-title">
+    <p class="eyebrow">About Local AI</p>
+    <h1 id="guide-title">Get to know<br><em>your AI.</em></h1>
+    <p class="guide-lead">Neo brings a few useful AI models into one simple app on your computer. Here’s what’s inside, how it works, and what you can do with it.</p>
+    <nav class="guide-jumps" aria-label="On this page"><a href="#models">The models <span aria-hidden="true">↓</span></a><a href="#built">How Neo was built <span aria-hidden="true">↓</span></a><a href="#features">The features <span aria-hidden="true">↓</span></a></nav>
+  </section>
+  <section class="guide-section section" id="models" aria-labelledby="models-title">
+    <div class="guide-section-head"><p class="eyebrow">01 / The models</p><h2 id="models-title">Three assistants.<br>Different strengths.</h2><p>Neo is the app that brings them together. Each assistant uses an existing model developed by its credited publisher.</p></div>
+    <div class="guide-models">
+      <article><span class="guide-label">CHAT</span><h3>Qwen3 1.7B</h3><p>For everyday questions, drafting messages, explaining ideas and finding a starting point.</p><dl><div><dt>Model family</dt><dd>Qwen, by the Qwen team at Alibaba</dd></div><div><dt>Neo’s version</dt><dd>Q8_0 · a compact GGUF model file</dd></div></dl><a href="https://huggingface.co/Qwen/Qwen3-1.7B-GGUF">Read the model details <span aria-hidden="true">↗</span></a></article>
+      <article><span class="guide-label">CODE</span><h3>Qwen2.5-Coder 1.5B</h3><p>For understanding code, working through a small programming task and drafting simple functions.</p><dl><div><dt>Model family</dt><dd>Qwen, by the Qwen team at Alibaba</dd></div><div><dt>Neo’s version</dt><dd>Instruct · Q4_K_M GGUF</dd></div></dl><a href="https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF">Read the model details <span aria-hidden="true">↗</span></a></article>
+      <article><span class="guide-label">IMAGE UNDERSTANDING</span><h3>SmolVLM 500M Instruct</h3><p>For describing a picture and answering simple questions about what is visible. This model reads images; it does not generate them.</p><dl><div><dt>Model family</dt><dd>SmolVLM, by Hugging Face</dd></div><div><dt>Neo’s version</dt><dd>Instruct · Q8_0 GGUF + vision projector</dd></div></dl><a href="https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF">Read the model details <span aria-hidden="true">↗</span></a></article>
+    </div>
+    <p class="guide-footnote">“B” means billion parameters; “M” means million. These describe model size, not a guarantee of accuracy. The compact versions help Neo fit on everyday computers.</p>
+  </section>
+  <section class="guide-section guide-warm section" id="built" aria-labelledby="built-title">
+    <div class="guide-section-head"><p class="eyebrow">02 / How it was created</p><h2 id="built-title">A local app,<br>built around open tools.</h2><p>Neo Local AI is a project by Omar Imran. Its interface and local services connect existing AI models into one experience. Neo does not train or fine-tune the underlying models.</p></div>
+    <ol class="guide-build"><li><span>01</span><div><h3>An interface you can open.</h3><p>The interface is built with HTML, CSS and JavaScript. On Mac, a native Swift window makes it open like a desktop app. The Windows preview opens the local interface in a browser.</p></div></li><li><span>02</span><div><h3>An engine on your computer.</h3><p>Python handles the app’s local requests, while <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> loads and runs the chat, code and vision models. Neo switches between models to keep memory use manageable.</p></div></li><li><span>03</span><div><h3>Models that work offline.</h3><p>Setup downloads model files from Hugging Face. After that, the installed models can answer locally without an AI subscription or an internet connection. Neo does not browse the web for current information.</p></div></li></ol>
+  </section>
+  <section class="guide-section section" id="features" aria-labelledby="features-title">
+    <div class="guide-section-head"><p class="eyebrow">03 / The features</p><h2 id="features-title">What you can do.</h2><p>Start with a conversation. Choose the assistant that fits your task, then use the other tools when you need them.</p></div>
+    <div class="guide-features">
+      <article><h3>Chat, code &amp; pictures</h3><p>Ask questions, get writing or coding help, and attach a picture for the vision model to explain.</p></article>
+      <article><h3>Appearance</h3><p>Switch between dark and light. In the 2.0 workspace, open Settings at the top right for theme and accent choices.</p></article>
+      <article><h3>Private memory</h3><p>Connect your own Obsidian vault to keep useful notes locally. If that vault uses a sync service, its existing sync settings still apply.</p></article>
+    </div>
+    <div class="guide-version"><span class="guide-label">THE 2.0 DEVELOPMENT WORKSPACE</span><h3>More tools, when you need them.</h3><p>The features below are part of Neo’s 2.0 workspace. The public Mac download is currently 1.3, and the Windows download is a 1.3 preview. These newer tools are not included in those downloads yet.</p></div>
+    <div class="guide-features">
+      <article><h3>Model hub</h3><p>See your installed models and choose optional downloads: Qwen3 0.6B for a smaller model, or Qwen3 4B for a larger one that needs more memory.</p></article>
+      <article><h3>Creative studio</h3><p>Generate pictures using Stable Diffusion 1.5 through a local ComfyUI engine. Analyze a video through up to four sampled frames; this does not include audio. Video generation needs a separate compatible workflow and models.</p></article>
+      <article><h3>Plugins</h3><p>Choose reusable instructions for writing, studying or planning, or create your own. These prompt plugins do not run code or automatically access your files.</p></article>
+      <article><h3>Integrations</h3><p>Connect supported local tools such as Ollama and ComfyUI, and manage your Obsidian memory connection.</p></article>
+      <article><h3>Local API</h3><p>Open Settings → Local API to connect your own software on the same computer. It is off by default, requires a separate key, and does not include your private memory.</p></article>
+      <article><h3>Saved conversations</h3><p>Return to previous chats through History, or export a conversation as a Markdown file to keep a copy.</p></article>
+    </div>
+    <aside class="guide-note"><strong>A useful assistant, with limits.</strong><p>Small local models can make mistakes. Check important answers and review generated code. Picture generation needs additional model files and can be slow on modest hardware. The website explains and distributes Neo; it does not process your private chats.</p></aside>
+    <a class="guide-credits" href="credits.html">Model sources &amp; credits <span aria-hidden="true">↗</span></a>
+  </section>
+</main>
+<footer><a class="brand" href="./"><img src="assets/logo.svg" width="32" height="32" alt=""><span>Neo Local AI</span></a><p class="footer-credit">Founder &amp; Creator · <a href="about.html">Omar Imran</a></p><a href="./#download">Get Neo</a></footer>
+</body>
+</html>
