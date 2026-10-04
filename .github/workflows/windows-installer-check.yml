@@ -6,12 +6,12 @@ on:
       installer_url:
         description: Exact published installer URL
         required: true
-        default: https://neolocalai.isroot.in/downloads/Neo-Local-AI-1.3.1-Windows-x64-Setup.exe
+        default: https://neolocalai.isroot.in/downloads/Neo-Local-AI-2.0.0-Windows-x64-Setup.exe
         type: string
       installer_sha256:
         description: Expected SHA-256 from the reviewed installer build
         required: true
-        default: 5520203ceea5c7679dbb96c1f0c6d4068c4b8567011e55cca9ccb5dd6fe93fea
+        default: 7d8d20fb00ecfcf6fb91497ad6afe8971991e5dd9d9dd8fae2040117e0ae1b53
         type: string
 
 permissions:
@@ -41,8 +41,8 @@ jobs:
               [ValidatePattern('^https://')][string]$InstallerUrl,
               [Parameter(Mandatory, ParameterSetName = 'Local')][string]$InstallerPath,
               [Parameter(Mandatory)][ValidatePattern('^[a-fA-F0-9]{64}$')][string]$ExpectedSha256,
-              [ValidatePattern('^\d+\.\d+\.\d+$')][string]$SetupVersion = '1.3.1',
-              [ValidatePattern('^\d+\.\d+\.\d+$')][string]$ApplicationVersion = '1.3.0',
+              [ValidatePattern('^\d+\.\d+\.\d+$')][string]$SetupVersion = '2.0.0',
+              [ValidatePattern('^\d+\.\d+\.\d+$')][string]$ApplicationVersion = '2.0.0',
               [string]$ReportDirectory = (Join-Path ([IO.Path]::GetTempPath()) 'neo-installer-smoke'),
               [switch]$AllowDisposableLocalMachine
           )
@@ -75,7 +75,7 @@ jobs:
               passed = $false; installer_url = $InstallerUrl; expected_sha256 = $ExpectedSha256.ToLowerInvariant()
               actual_sha256 = $null; windows = [Environment]::OSVersion.VersionString
               checks = $checks; error = $null
-              scope = 'Exact EXE install, file integrity, versions, shortcuts, local startup, silent upgrade and data-preserving uninstall. No model downloads or AI inference.'
+              scope = 'Exact EXE install, file integrity, versions, shortcuts, local startup, silent upgrade and data-preserving uninstall. Current backend APIs, chat History, settings, Model Hub, plugins, private defaults. No model downloads or AI inference.'
           }
           $httpHandler = [Net.Http.HttpClientHandler]::new()
           $httpHandler.UseProxy = $false
@@ -203,6 +203,88 @@ jobs:
           '@ | Set-Content -LiteralPath $probeScript -Encoding utf8
               Invoke-Program $python @('-I', '-B', $probeScript, $launcher, $ApplicationVersion) 'launcher-startup' 90 | Out-Null
               Assert-Check ($null -ne (Get-NeoStatus)) 'Bundled launcher and bootstrap serve local first-run setup'
+              $featureProbe = Join-Path $ReportDirectory 'feature-probe.py'
+              @'
+          """Exercise installed current backend on a temporary, empty support directory.
+          
+          No model download or inference; authenticated endpoint checks also run natively
+          on Windows with the exact embedded Python distributed by Setup.
+          """
+          import json, shutil, sys, tempfile, threading, urllib.error, urllib.request
+          from pathlib import Path
+          
+          BACKEND = Path(sys.argv[1]).resolve()
+          VERSION = sys.argv[2] if len(sys.argv) > 2 else '2.0.0'
+          sys.path.insert(0, str(BACKEND))
+          import server as neo
+          from windows_memory import WindowsMemory
+          
+          checks = []
+          def check(condition, name):
+              assert condition, name
+              checks.append(name)
+              print('PASS:', name)
+          
+          with tempfile.TemporaryDirectory(prefix='neo-current-probe-') as directory:
+              base = Path(directory)
+              (base/'data').mkdir()
+              (base/'models').mkdir()
+              shutil.copytree(BACKEND/'web', base/'web')
+              manager = neo.ModelManager(base, neo.read_config(BACKEND))
+              manager.memory = WindowsMemory()
+              server = neo.AppServer(('127.0.0.1', 0), manager)
+              thread = threading.Thread(target=server.serve_forever, daemon=True)
+              thread.start()
+              http = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+              url = 'http://127.0.0.1:' + str(server.server_port)
+              token = server.session_token
+              def request(path, payload=None, auth=True, bearer=None):
+                  headers = {'Content-Type': 'application/json'}
+                  if auth: headers['X-Session-Token'] = token
+                  if bearer: headers['Authorization'] = 'Bearer ' + bearer
+                  req = urllib.request.Request(url+path, headers=headers,
+                                               data=json.dumps(payload).encode() if payload is not None else None)
+                  with http.open(req, timeout=10) as response:
+                      return json.load(response)
+              try:
+                  status = request('/api/status', auth=False)
+                  check(status['version'] == VERSION and status['platform'] == 'windows', 'Current backend version and Windows identity')
+                  workspace = request('/api/workspace')
+                  check(workspace['chats'] == [] and workspace['projects'] == [], 'Empty private workspace on fresh install')
+                  check(len(workspace['plugins']) >= 5, 'Current built-in prompt plugins available')
+                  check(request('/api/local-api')['enabled'] is False, 'Local API disabled by default')
+                  memory = request('/api/memory')
+                  check(memory['supported'] is False and memory['auto_save'] is False, 'Unsupported Windows vault integration clearly disabled')
+                  hub = request('/api/hub')
+                  check(len(hub['models']) >= 3 and any(m['id'] == 'qwen35-plus' and m['bytes'] == 2740937888 for m in hub['catalog']), 'Starter models and Qwen3.5 4B optional model catalog available')
+                  check(not any(model['installed'] for model in hub['models']), 'Model weights absent on clean install')
+                  check(request('/api/media/status')['enabled'] is False, 'Optional media integration disabled by default')
+                  try:
+                      request('/api/workspace', auth=False)
+                      raise AssertionError('Workspace accepted missing token')
+                  except urllib.error.HTTPError as error:
+                      check(error.code == 403, 'Workspace rejects unauthenticated requests')
+                  chat = request('/api/chats', {'title': 'Release validation', 'model': 'chat'})['chat']
+                  messages = [{'role':'user','content':'Local validation message'}, {'role':'assistant','content':'Saved locally'}]
+                  saved = request('/api/chats/save', {'id': chat['id'], 'messages': messages})['chat']
+                  loaded = request('/api/chats/'+chat['id'])['chat']
+                  check(loaded['messages'] == messages, 'History saves and retrieves complete conversations')
+                  request('/api/settings', {'theme': 'light', 'accent': 'copper'})
+                  check(request('/api/settings')['settings']['theme'] == 'light', 'Appearance settings persist')
+                  html = (base/'web/index.html').read_text(encoding='utf-8')
+                  studio = (base/'web/studio.js').read_text(encoding='utf-8')
+                  check('Model hub' in html and 'Local API' in html and 'studio.js' in html, 'Current interface and feature script bundled')
+                  check('settings-toggle' in html and 'data-view="projects"' not in html, 'Simplified Settings interface without Projects navigation')
+                  check('settings-menu' in html or 'openSettings' in studio, 'Top-right settings controls bundled')
+                  print(json.dumps({'passed': True, 'checks': checks, 'catalog': [m['id'] for m in hub['catalog']]}, indent=2))
+              finally:
+                  server.shutdown()
+                  server.features.close()
+                  server.server_close()
+                  manager.close()
+                  thread.join(timeout=5)
+          '@ | Set-Content -LiteralPath $featureProbe -Encoding utf8
+              Invoke-Program $python @('-I', '-B', $featureProbe, (Join-Path $InstallRoot 'resources\backend'), $ApplicationVersion) 'current-backend-features' 60 | Out-Null
               Assert-Check (@(Get-ChildItem -LiteralPath (Join-Path $SupportRoot 'models') -File).Count -eq 0) 'First launch waits for user before model download'
               $sentinelId = [Guid]::NewGuid().ToString('N')
               $sentinels = @{
