@@ -7,7 +7,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="theme-color" content="#604b3f">
   <title>About Local AI — Neo Local AI</title>
-  <meta name="description" content="Meet Neo Local AI: its three local assistants, the models behind them, how the app was built, and what its features do.">
+  <meta name="description" content="Meet Neo Local AI: its local assistants and optional models, the tools behind them, how the app was built, and what its features do.">
   <link rel="canonical" href="https://neolocalai.isroot.in/about-ai.html">
   <link rel="icon" href="assets/logo.svg">
   <link rel="stylesheet" href="style.css?v=brown-cream-1">
@@ -70,12 +70,13 @@
     </div>
   </section>
   <section class="guide-section section" id="models" aria-labelledby="models-title">
-    <div class="guide-section-head"><p class="eyebrow">01 / The models</p><h2 id="models-title">Three assistants.<br>Different strengths.</h2><p>Neo is the app that brings them together. Each assistant uses an existing model developed by its credited publisher.</p></div>
+    <div class="guide-section-head"><p class="eyebrow">01 / The models</p><h2 id="models-title">Your choice.<br>Different strengths.</h2><p>Start with three built-in assistants, then choose optional models in Model hub. Each assistant uses an existing model developed by its credited publisher.</p></div>
     <div class="guide-models">
       <article><span class="guide-label">CHAT</span><h3>Qwen3 1.7B</h3><p>For everyday questions, drafting messages, explaining ideas and finding a starting point.</p><dl><div><dt>Model family</dt><dd>Qwen, by the Qwen team at Alibaba</dd></div><div><dt>Neo’s version</dt><dd>Q8_0 · a compact GGUF model file</dd></div></dl><a href="https://huggingface.co/Qwen/Qwen3-1.7B-GGUF">Read the model details <span aria-hidden="true">↗</span></a></article>
       <article><span class="guide-label">CODE</span><h3>Qwen2.5-Coder 1.5B</h3><p>For understanding code, working through a small programming task and drafting simple functions.</p><dl><div><dt>Model family</dt><dd>Qwen, by the Qwen team at Alibaba</dd></div><div><dt>Neo’s version</dt><dd>Instruct · Q4_K_M GGUF</dd></div></dl><a href="https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF">Read the model details <span aria-hidden="true">↗</span></a></article>
       <article><span class="guide-label">IMAGE UNDERSTANDING</span><h3>SmolVLM 500M Instruct</h3><p>For describing a picture and answering simple questions about what is visible. This model reads images; it does not generate them.</p><dl><div><dt>Model family</dt><dd>SmolVLM, by Hugging Face</dd></div><div><dt>Neo’s version</dt><dd>Instruct · Q8_0 GGUF + vision projector</dd></div></dl><a href="https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF">Read the model details <span aria-hidden="true">↗</span></a></article>
     </div>
+    <div class="guide-version"><span class="guide-label">OPTIONAL MODEL · NEO 2.0</span><h3>Qwen3.5 4B · Deeper answers</h3><p>A newer model for detailed explanations, writing and reasoning. Download it from Model hub, then choose Use model. The text model needs an extra 2.74 GB download and runs offline afterward, with no API key or per-message fee. It uses more memory than the default assistant and can be slower. Keep the default Qwen3 1.7B for lighter tasks. <a href="https://huggingface.co/Qwen/Qwen3.5-4B">Read the model details</a>.</p></div>
     <p class="guide-footnote">“B” means billion parameters; “M” means million. These describe model size, not a guarantee of accuracy. The compact versions help Neo fit on everyday computers.</p>
   </section>
   <section class="guide-section guide-warm section" id="built" aria-labelledby="built-title">
@@ -87,14 +88,14 @@
     <div class="guide-features">
       <article><h3>Chat, code &amp; pictures</h3><p>Ask questions, get writing or coding help, and attach a picture for the vision model to explain.</p></article>
       <article><h3>Appearance</h3><p>Switch between dark and light. In the 2.0 workspace, open Settings at the top right for theme and accent choices.</p></article>
-      <article><h3>Private memory</h3><p>Connect your own Obsidian vault to keep useful notes locally. If that vault uses a sync service, its existing sync settings still apply.</p></article>
+      <article><h3>Private memory</h3><p>On Mac, keep useful notes in your own Obsidian vault after configuring its location in the local settings file. This preview does not yet include a vault picker. Vault sync settings still apply. Obsidian memory is not available in the Windows preview.</p></article>
     </div>
-    <div class="guide-version"><span class="guide-label">THE 2.0 DEVELOPMENT WORKSPACE</span><h3>More tools, when you need them.</h3><p>The features below are part of Neo’s 2.0 workspace. The public Mac download is currently 1.3, and the Windows download is a 1.3 preview. These newer tools are not included in those downloads yet.</p></div>
+    <div class="guide-version"><span class="guide-label">INCLUDED IN NEO 2.0</span><h3>More tools, when you need them.</h3><p>The current Mac download and Windows setup include the 2.0 workspace, with saved chats, Model hub, prompt plugins, Appearance settings and the optional Local API. Media generation needs a separately installed local engine and models.</p></div>
     <div class="guide-features">
-      <article><h3>Model hub</h3><p>See your installed models and choose optional downloads: Qwen3 0.6B for a smaller model, or Qwen3 4B for a larger one that needs more memory.</p></article>
-      <article><h3>Creative studio</h3><p>Generate pictures using Stable Diffusion 1.5 through a local ComfyUI engine. Analyze a video through up to four sampled frames; this does not include audio. Video generation needs a separate compatible workflow and models.</p></article>
+      <article><h3>Model hub</h3><p>See your installed models and add optional downloads: Qwen3 0.6B for lighter tasks, Qwen3 4B, or the newer Qwen3.5 4B for deeper answers. Neo loads one language model at a time.</p></article>
+      <article><h3>Creative studio</h3><p>Connect a local ComfyUI engine to generate pictures with compatible models. The engine and image models are not bundled in the app download. Analyze a video through up to four sampled frames; this does not include audio. Video generation needs a separate compatible workflow and models.</p></article>
       <article><h3>Plugins</h3><p>Choose reusable instructions for writing, studying or planning, or create your own. These prompt plugins do not run code or automatically access your files.</p></article>
-      <article><h3>Integrations</h3><p>Connect supported local tools such as Ollama and ComfyUI, and manage your Obsidian memory connection.</p></article>
+      <article><h3>Integrations</h3><p>Connect supported local tools such as Ollama and ComfyUI. On Mac, you can also open an already-configured Obsidian vault and control memory autosave.</p></article>
       <article><h3>Local API</h3><p>Open Settings → Local API to connect your own software on the same computer. It is off by default, requires a separate key, and does not include your private memory.</p></article>
       <article><h3>Saved conversations</h3><p>Return to previous chats through History, or export a conversation as a Markdown file to keep a copy.</p></article>
     </div>

@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "date": "2026-10-04",
+  "channel": "preview",
+  "downloads": [
+    {
+      "file": "downloads/Neo-Local-AI-2.0.0-Mac.zip",
+      "platform": "mac-arm64",
+      "kind": "app-zip",
+      "bytes": 22441641,
+      "sha256": "8c8d91645ff728aa4a8358af6b8607b95996658c09aad8566825d986aa4a682b"
+    },
+    {
+      "file": "downloads/Neo-Local-AI-2.0.0-Windows-x64-Setup.exe",
+      "platform": "windows-x64",
+      "kind": "installer",
+      "bytes": 18692579,
+      "sha256": "7d8d20fb00ecfcf6fb91497ad6afe8971991e5dd9d9dd8fae2040117e0ae1b53"
+    },
+    {
+      "file": "downloads/Neo-Local-AI-2.0.0-Windows-x64-preview.zip",
+      "platform": "windows-x64",
+      "kind": "portable-zip",
+      "bytes": 23950508,
+      "sha256": "a5976185abf1875083ec4cf51c57e1cc95feaa1e22c21bbd6bcd32efe998bb8e"
+    }
+  ]
+}
